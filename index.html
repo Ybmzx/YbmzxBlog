@@ -1,1 +1,156 @@
-Hello World
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>节日快乐</title>
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="shortcut icon" href="icon.png" type="image/x-icon">
+    <script src="js/jquery.js"></script>    
+</head>
+<body onload="init()">
+    <div class="CodeViews">
+        <li class="code" style="font-size: 30px;">**********  节日快乐 ***********</li>
+        <li class="code" style="font-size: 30px;">********** 2023/3/8 ***********</li>
+        <br><br><br><br><br><br><br><br><br><br><br><br>
+        <li class="code">class Transform { //定义类 变换</li>
+            <li class="code">    constructor(x, y, height, width) {</li>
+            <li class="code">        this.x = x;</li>
+            <li class="code">        this.y = y;</li>
+            <li class="code">        this.height = height;</li>
+            <li class="code">        this.width = width;</li>
+            <li class="code"></li>
+            <li class="code">    }</li>
+            <li class="code">}</li>
+            <li class="code">class Particle {//定义类 粒子</li>
+            <li class="code">    constructor(Transform, offset, direction_x, direction_y, color) {</li>
+            <li class="code">        this.transform = Transform;</li>
+            <li class="code">        this.offset = offset;</li>
+            <li class="code">        this.direction_x = direction_x;</li>
+            <li class="code">        this.direction_y = direction_y;</li>
+            <li class="code">        this.color = color;</li>
+            <li class="code">    }</li>
+            <li class="code">    draw() {//函数 画出粒子</li>
+            <li class="code">        ctx.save();</li>
+            <li class="code">        ctx.scale(1, -1);//设置画笔scale</li>
+            <li class="code">        //设置阴影模拟辉光</li>
+            <li class="code">        ctx.shadowColor = this.color;//设置阴影颜色</li>
+            <li class="code">        ctx.shadowBlur = 20;//设置阴影模糊程度</li>
+            <li class="code">        ctx.fillStyle = this.color;//设置颜色</li>
+            <li class="code">        x = this.transform.width / 2.0 + this.transform.x;//计算粒子坐标</li>
+            <li class="code">        y = this.transform.height / 2.0 + this.transform.y;</li>
+            <li class="code">        ctx.fillRect(x + this.direction_x * this.offset, y + this.direction_y * this.offset, this.transform.width, this.transform.height);//画出粒子</li>
+            <li class="code">        ctx.restore();</li>
+            <li class="code">    }</li>
+            <li class="code">}</li>
+            <li class="code">var LoveParticles = new Array();//主粒子</li>
+            <li class="code">var particle = new Array();//爆炸粒子</li>
+            <li class="code">var pageWidth = document.documentElement.scrollWidth;//获得页面长宽</li>
+            <li class="code">var pageHeight = document.documentElement.scrollHeight;</li>
+            <li class="code">var cvs = document.getElementById("cvs");//获得画布</li>
+            <li class="code">var frame = 0;//初始化帧</li>
+            <li class="code">cvs.width = pageWidth;//设置画布大小</li>
+            <li class="code">cvs.height = pageHeight * 69 / 100;</li>
+            <li class="code">var ctx = cvs.getContext('2d');//设置画笔</li>
+            <li class="code">var speed = 10;//设置爆炸速度</li>
+            <li class="code">var back=false,explode=false,reset=false;</li>
+            <li class="code">var request;</li>
+            <li class="code">var interval;</li>
+            <li class="code">function easeOutQuad(currentTime, startValue, changeValue, duration) {//缓出</li>
+            <li class="code">    currentTime /= duration;</li>
+            <li class="code">    return -changeValue * currentTime * (currentTime - 2) + startValue;</li>
+            <li class="code">}</li>
+            <li class="code">function easeInQuad(currentTime, startValue, changeValue, duration) {//缓入</li>
+            <li class="code">    currentTime /= duration;</li>
+            <li class="code">    return changeValue * currentTime * currentTime + startValue;</li>
+            <li class="code">}</li>
+            <li class="code">function draw() {//更新 函数</li>
+            <li class="code">    frame++;</li>
+            <li class="code">    //拖尾效果</li>
+            <li class="code">    ctx.fillStyle = 'rgba(184, 142, 94,0.3)';</li>
+            <li class="code">    ctx.fillRect(0,0,cvs.width,cvs.height);</li>
+            <li class="code">    //主粒子</li>
+            <li class="code">    LoveParticles.forEach((element) => {</li>
+            <li class="code">        //更新主粒子偏移</li>
+            <li class="code">        if(back)</li>
+            <li class="code">        {</li>
+            <li class="code">            element.offset = easeInQuad(frame, 0, 1000, 120)</li>
+            <li class="code">            if(element.offset>50)explode=true;</li>
+            <li class="code">            if(element.offset>1000&&!reset)</li>
+            <li class="code">            {</li>
+            <li class="code">                setTimeout(()=>{</li>
+            <li class="code">                    init();</li>
+            <li class="code">                    cancelAnimationFrame(request);</li>
+            <li class="code">                },1000)</li>
+            <li class="code">                clearInterval(interval);</li>
+            <li class="code">                interval = setInterval(function(){</li>
+            <li class="code">                    ctx.globalAlpha -= 0.1</li>
+            <li class="code">                    </li>
+            <li class="code">                },100)</li>
+            <li class="code">                reset=true;</li>
+            <li class="code">            }</li>
+            <li class="code">        }</li>
+            <li class="code">        if (element.offset > 0&&back==false) {</li>
+            <li class="code">            element.offset = easeOutQuad(frame, 1000, -1000, 120);//缓出</li>
+            <li class="code">            if(element.offset<=0){back=true;frame=0;}//part1动画结束，设置变量</li>
+            <li class="code">        }</li>
+            <li class="code">        </li>
+            <li class="code">        element.draw();//画出粒子</li>
+            <li class="code">    })</li>
+            <li class="code">    if(back&&explode)</li>
+            <li class="code">    {</li>
+            <li class="code">        //更新爆炸粒子偏移</li>
+            <li class="code">        particle.forEach((val) => {</li>
+            <li class="code">            val.draw();</li>
+            <li class="code">            val.offset += speed;</li>
+            <li class="code">        })</li>
+            <li class="code">        speed+=1;</li>
+            <li class="code">    }</li>
+            <li class="code">    window.requestAnimationFrame(draw);</li>
+            <li class="code">}</li>
+            <li class="code">function init() {//初始化函数</li>
+            <li class="code">    //初始化变量</li>
+            <li class="code">    clearInterval(interval);</li>
+            <li class="code">    ctx.globalAlpha=0;</li>
+            <li class="code">    back=false,explode=false;frame=0;reset=false;</li>
+            <li class="code">    speed=10;</li>
+            <li class="code">    LoveParticles.splice(0,LoveParticles.length); </li>
+            <li class="code">    particle.splice(0,particle.length); </li>
+            <li class="code">    //设置主粒子位置</li>
+            <li class="code">    for (let i = 0; i < 30; i += 0.2) {</li>
+            <li class="code">        angle = i / Math.PI;</li>
+            <li class="code">        x = 10 * (16 * Math.sin(angle) ** 3);</li>
+            <li class="code">        y = 10 * (13 * Math.cos(angle) - 5 * Math.cos(2 * angle) - 2 * Math.cos(3 * angle) - Math.cos(4 * angle));</li>
+            <li class="code">        LoveParticles.push(new Particle(new Transform(cvs.width / 2 + x, y - cvs.height / 2, 7, 7), 1000, Math.random() * 2 - 1, Math.random() * 2 - 1, "#FF0000"));</li>
+            <li class="code">    }</li>
+            <li class="code">    for (let i = 0; i < 30; i += 0.2) {</li>
+            <li class="code">        angle = i / Math.PI;</li>
+            <li class="code">        x = 10 * (16 * Math.sin(angle) ** 3);</li>
+            <li class="code">        y = 10 * (13 * Math.cos(angle) - 5 * Math.cos(2 * angle) - 2 * Math.cos(3 * angle) - Math.cos(4 * angle));</li>
+            <li class="code">        LoveParticles.push(new Particle(new Transform(cvs.width / 2 + x + Math.random() * 50 - 25, y - cvs.height / 2 + Math.random() * 50 - 25, 7, 7), 1000, Math.random() * 2 - 1, Math.random() * 2 - 1, "rgba(255,70,70,0.7)"));</li>
+            <li class="code">    }</li>
+            <li class="code">    for (let i = 0; i < 30; i += 0.2) {</li>
+            <li class="code">        angle = i / Math.PI;</li>
+            <li class="code">        x = 10 * (16 * Math.sin(angle) ** 3);</li>
+            <li class="code">        y = 10 * (13 * Math.cos(angle) - 5 * Math.cos(2 * angle) - 2 * Math.cos(3 * angle) - Math.cos(4 * angle));</li>
+            <li class="code">        LoveParticles.push(new Particle(new Transform(cvs.width / 2 + x + Math.random() * 100 - 50, y - cvs.height / 2 + Math.random() * 100 - 50, 7, 7), 1000, Math.random() * 2 - 1, Math.random() * 2 - 1, "rgba(255,70,70,0.5)"));</li>
+            <li class="code">    }</li>
+            <li class="code">    //设置爆炸粒子位置</li>
+            <li class="code">    for (let i = 0; i < 100; i++) {</li>
+            <li class="code">        particle.push(new Particle(new Transform(cvs.width / 2, -cvs.height / 2, 5, 5), 0, Math.random() * 2 - 1, Math.random() * 2 - 1, "orange"))</li>
+            <li class="code">    }</li>
+            <li class="code">    //更改透明度</li>
+            <li class="code">    interval = setInterval(function(){</li>
+            <li class="code">        ctx.globalAlpha += 0.1</li>
+            <li class="code">        if(ctx.globalAlpha>=1)</li>
+            <li class="code">        {</li>
+            <li class="code">            globalAlpha=1;</li>
+            <li class="code">            clearInterval(interval);</li>
+            <li class="code">        }</li>
+            <li class="code">    },80)</li>
+            <li class="code">    request = window.requestAnimationFrame(draw);</li>
+            <li class="code">}</li>
+    </div>
+    <canvas class="cvs" id="cvs">浏览器不支持Canvas标签，请更换浏览器</canvas>
+    <script src="js/index.js"></script>
+</body>
+</html>
